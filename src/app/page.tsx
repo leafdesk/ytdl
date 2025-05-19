@@ -1,6 +1,7 @@
 import { Container } from '@chakra-ui/react'
 import VideoDownloadUnit from './video-download-unit'
 import VideoDownloadUnitV2 from './video-download-unit-v2'
+import VideoUploadUnit from './video-upload-unit'
 
 export default function RootPage() {
   return (
@@ -17,6 +18,11 @@ export default function RootPage() {
       {/* <Container>
         <VideoDownloadUnitV2 />
       </Container> */}
+
+      {/* Video Upload to Dropbox */}
+      <Container>
+        <VideoUploadUnit />
+      </Container>
     </>
   )
 }
