@@ -1,28 +1,19 @@
 import { Container } from '@chakra-ui/react'
 import VideoDownloadUnit from './video-download-unit'
-import VideoDownloadUnitV2 from './video-download-unit-v2'
 import VideoUploadUnit from './video-upload-unit'
 
 export default function RootPage() {
   return (
-    <>
+    <Container className="flex flex-col md:flex-row" gap={4}>
       {/* @distube/ytdl-core 라이브러리 사용 */}
-      <Container>
+      <div className="flex-1">
         <VideoDownloadUnit />
-      </Container>
-
-      {/* blank */}
-      <div className="h-16" />
-
-      {/* youtubei.js 라이브러리 사용 */}
-      {/* <Container>
-        <VideoDownloadUnitV2 />
-      </Container> */}
+      </div>
 
       {/* Video Upload to Dropbox */}
-      <Container>
+      <div className="flex-1">
         <VideoUploadUnit />
-      </Container>
-    </>
+      </div>
+    </Container>
   )
 }

@@ -1,38 +1,78 @@
 'use client'
 
-import { Button, Stack, Text } from '@chakra-ui/react'
+import { Button, Field, Fieldset, Input, Stack, Text } from '@chakra-ui/react'
 import { uploadLocalFileToDropbox } from './actions/dropbox-upload-action'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function VideoUploadUnit() {
-  const localPath = '/Users/rian/Downloads/temp.mp4' // 업로드할 로컬 파일
-  const dropboxPath = '/temp.mp4' // Dropbox 목적지
   const [isUploading, setIsUploading] = useState(false)
+  const [sourcePath, setSourcePath] = useState('/Users/rian/Downloads/temp.mp4')
+  const [destinationPath, setDestinationPath] = useState('/temp.mp4')
 
-  const handleUpload = async () => {
+  useEffect(() => {
+    const fileName = sourcePath.split('/').pop() || ''
+    setDestinationPath(`/${fileName}`)
+  }, [sourcePath])
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsUploading(true)
+
     try {
-      setIsUploading(true)
-      await uploadLocalFileToDropbox(localPath, dropboxPath)
+      const response = await uploadLocalFileToDropbox(
+        sourcePath,
+        destinationPath,
+      )
+      console.log('DropboxResponse:', response)
     } catch (error) {
-      console.error(error)
+      console.error('Upload Error:', error)
     } finally {
       setIsUploading(false)
     }
   }
 
+  const handleSourcePathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSourcePath(e.target.value)
+  }
+
   return (
     <>
-      <Stack className="max-w-md">
-        <Text>Upload to Dropbox</Text>
+      <form onSubmit={handleSubmit}>
+        <Fieldset.Root size="lg" maxW="md">
+          <Stack>
+            <Fieldset.Legend>Upload Video to Dropbox</Fieldset.Legend>
+            <Fieldset.HelperText>
+              Please provide the file paths below.
+            </Fieldset.HelperText>
+          </Stack>
 
-        <Button
-          className="self-start"
-          onClick={handleUpload}
-          disabled={isUploading}
-        >
-          {isUploading ? '업로드 중...' : '업로드'}
-        </Button>
-      </Stack>
+          <Fieldset.Content>
+            <Field.Root>
+              <Field.Label>Source Path (Local)</Field.Label>
+              <Input
+                name="sourcePath"
+                value={sourcePath}
+                onChange={handleSourcePathChange}
+                disabled={isUploading}
+              />
+            </Field.Root>
+
+            <Field.Root>
+              <Field.Label>Destination Path (Dropbox)</Field.Label>
+              <Input
+                name="destinationPath"
+                value={destinationPath}
+                readOnly
+                disabled={isUploading}
+              />
+            </Field.Root>
+          </Fieldset.Content>
+
+          <Button type="submit" alignSelf="flex-start" disabled={isUploading}>
+            {isUploading ? 'Uploading...' : 'Upload'}
+          </Button>
+        </Fieldset.Root>
+      </form>
     </>
   )
 }

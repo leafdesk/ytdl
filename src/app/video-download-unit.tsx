@@ -72,7 +72,7 @@ export default function VideoDownloadUnit() {
           </Fieldset.Content>
 
           <Button type="submit" alignSelf="flex-start" disabled={isLoading}>
-            {isLoading ? '다운로드 중...' : '다운로드'}
+            {isLoading ? 'Downloading...' : 'Download'}
           </Button>
         </Fieldset.Root>
       </form>
