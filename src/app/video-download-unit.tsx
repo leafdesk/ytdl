@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { api } from '@/lib/api'
+import { YoutubeDownloadRequest } from '@/lib/api/dto/youtube-download'
 
 export default function VideoDownloadUnit() {
   const [isLoading, setIsLoading] = useState(false)
@@ -20,12 +21,16 @@ export default function VideoDownloadUnit() {
     setIsLoading(true)
 
     const formData = new FormData(event.currentTarget)
-    const url = formData.get('url') as string
-    const downloadPath = formData.get('path') as string
-    console.log(`URL: ${url}, Download Path: ${downloadPath}`)
+    const request: YoutubeDownloadRequest = {
+      videoUrl: formData.get('url') as string,
+      outputPath: formData.get('path') as string,
+    }
+    console.log(
+      `URL: ${request.videoUrl}, Download Path: ${request.outputPath}`,
+    )
 
     try {
-      const response = await api.youtube.download(url, downloadPath)
+      const response = await api.youtube.download(request)
       console.log(response)
     } catch (error) {
       console.error('다운로드 오류:', error)

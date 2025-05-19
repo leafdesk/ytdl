@@ -1,24 +1,16 @@
 import fs from 'fs'
 import path from 'path'
 import ytdl from '@distube/ytdl-core'
-
-/**
- * 유튜브 API 키.
- */
-const API_KEY = process.env.YOUTUBE_API_KEY
-
-/**
- * 유튜브 API 요청 - 사용자 에이전트.
- */
-const USER_AGENT = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36`
+import { YoutubeDownloadResponse } from '../api/dto/youtube-download'
 
 /**
  * 유튜브 API 요청 옵션.
  */
 const REQUEST_OPTIONS = {
   headers: {
-    Authorization: `Bearer ${API_KEY}`,
-    'User-Agent': USER_AGENT,
+    Authorization: `Bearer ${process.env.YOUTUBE_API_KEY}`,
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
   },
 }
 
@@ -59,13 +51,6 @@ const getYoutubeVideoInfo = async (url: string) => {
 }
 
 /**
- * 유튜브 URL 유효성 검사.
- */
-const validateYoutubeUrl = (url: string) => {
-  return ytdl.validateURL(url)
-}
-
-/**
  * 유튜브 다운로드 옵션 생성.
  */
 const generateYoutubeDownloadOptions = (
@@ -84,15 +69,14 @@ const generateYoutubeDownloadOptions = (
 /**
  * 유튜브 영상 다운로드.
  */
-export const downloadVideo = async (
+export async function downloadVideo(
   url: string,
   outputPath: string,
   onProgress: (progress: number) => void,
-) => {
+): Promise<YoutubeDownloadResponse> {
   try {
-    if (!validateYoutubeUrl(url)) {
-      throw new Error('Invalid YouTube URL')
-    }
+    if (!ytdl.validateURL(url)) throw new Error('Invalid YouTube URL')
+
     const videoInfo = await getYoutubeVideoInfo(url)
     const sanitizedTitle = sanitizeText(videoInfo.videoDetails.title)
     const outputFilePath = path.join(outputPath, `${sanitizedTitle}.mp4`)
@@ -105,10 +89,14 @@ export const downloadVideo = async (
     })
     videoStream.pipe(fileStream)
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<YoutubeDownloadResponse>((resolve, reject) => {
       fileStream.on('finish', () => {
-        console.log(`Downloaded: ${outputFilePath}`)
-        resolve()
+        console.log(`Downloaded: ${outputFilePath}/${sanitizedTitle}.mp4`)
+        resolve({
+          outputFilePath: outputFilePath,
+          fileName: `${sanitizedTitle}.mp4`,
+          fileNameWithoutExtension: sanitizedTitle,
+        })
       })
       fileStream.on('error', (err) => {
         reject(err)
